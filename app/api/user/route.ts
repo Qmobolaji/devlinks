@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { writeFile } from "fs/promises";
+import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 
 import { connectToDB } from "@/lib/database";
@@ -53,19 +53,24 @@ export async function PUT(request: NextRequest) {
 
     if (profilePicture) {
       const buffer = Buffer.from(await profilePicture.arrayBuffer());
-
       const fileName = `${email}_${profilePicture.name.replaceAll(" ", "_")}`;
       profilePicturePath = `/users/${fileName}`;
+      const dirPath = path.join(process.cwd(), "public", "users");
 
       try {
-        // Write the file to the specified directory (public/assets) with the modified filename
+        // Ensure the directory exists
+        await mkdir(dirPath, { recursive: true });
+        // Write the file
         await writeFile(
           path.join(process.cwd(), "public", profilePicturePath),
           buffer,
         );
       } catch (error) {
         console.error("Error occurred ", error);
-        return NextResponse.json({ Message: "Failed", status: 500 });
+        return NextResponse.json(
+          { error: "Failed to save profile picture" },
+          { status: 500 },
+        );
       }
     }
 
