@@ -73,7 +73,7 @@ const UserProfileMain = () => {
 
       fetchUserData();
     }
-  }, [session?.user.id]);
+  }, [session?.user.id, session]);
 
   useEffect(() => {
     if (userData) {

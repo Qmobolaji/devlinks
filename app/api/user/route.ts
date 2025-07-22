@@ -63,7 +63,7 @@ export async function PUT(request: NextRequest) {
         // Write the file
         await writeFile(
           path.join(process.cwd(), "public", profilePicturePath),
-          buffer,
+          buffer as Uint8Array,
         );
       } catch (error) {
         console.error("Error occurred ", error);
