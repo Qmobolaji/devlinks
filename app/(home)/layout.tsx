@@ -4,7 +4,7 @@ import { Instrument_Sans } from "next/font/google";
 import "../globals.css";
 
 import { AuthProvider } from "@/components/Providers";
-
+import { Toaster } from "@/components/ui/toaster";
 import Header from "@/components/Header";
 
 const instrumentSans = Instrument_Sans({ subsets: ["latin"], display: "swap" });
@@ -27,6 +27,8 @@ export default async function RootLayout({
           <Header />
 
           {children}
+
+          <Toaster />
         </AuthProvider>
       </body>
     </html>

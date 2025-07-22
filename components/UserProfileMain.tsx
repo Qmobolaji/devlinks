@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { userProfileSchema } from "@/lib/schema";
+import { useToast } from "@/hooks/use-toast";
 import ProfilePicPlaceholder from "@/public/assets/ProfilePicPlaceholder.jpg";
 
 type UserData = {
@@ -38,6 +39,7 @@ const UserProfileMain = () => {
     useState<string>("");
 
   const router = useRouter();
+  const { toast } = useToast();
 
   const form = useForm<userProfileValues>({
     resolver: zodResolver(userProfileSchema),
@@ -71,7 +73,7 @@ const UserProfileMain = () => {
 
       fetchUserData();
     }
-  }, [session?.user.id]);
+  }, [session?.user.id, session]);
 
   useEffect(() => {
     if (userData) {
@@ -118,18 +120,24 @@ const UserProfileMain = () => {
       });
 
       if (!response.ok) {
-        alert("Failed to save changes.");
+        toast({
+          description: "Failed to update profile. Please try again.",
+        });
         throw new Error("Failed to update user data");
       }
 
-      alert("Profile updated successfully!");
+      toast({
+        description: "Profile updated successfully!",
+      });
       const updatedData = await response.json();
 
       setUserData(updatedData.user);
       router.push("/preview");
     } catch (error) {
       console.error(error);
-      alert("Failed to save changes.");
+      toast({
+        description: "Failed to save changes.",
+      });
     }
   };
 
