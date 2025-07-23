@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import validator from "validator";
 
 import { connectToDB } from "@/lib/database";
 import User from "@/models/user";
@@ -16,6 +17,22 @@ export async function POST(request: NextRequest) {
     links: { platform: string; link: string }[];
     linksToRemove: string[];
   } = await request.json();
+
+  // Validate links
+  for (const link of links) {
+    if (!link.platform || !link.link) {
+      return NextResponse.json(
+        { message: "Platform and link are required." },
+        { status: 400 },
+      );
+    }
+    if (!validator.isURL(link.link)) {
+      return NextResponse.json(
+        { message: `Invalid URL: ${link.link}` },
+        { status: 400 },
+      );
+    }
+  }
 
   try {
     if (linksToRemove && linksToRemove.length > 0) {

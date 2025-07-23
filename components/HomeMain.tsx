@@ -14,6 +14,7 @@ import FormSection from "@/components/FormSection";
 import { LinkSkeleton } from "@/components/Skeleton";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { useToast } from "@/hooks/use-toast";
 import { addLinkFormSchema } from "@/lib/schema";
 
 import MainImage from "@/public/assets/MainImage.svg";
@@ -48,6 +49,7 @@ const HomeMain = () => {
   const [linksToRemove, setLinksToRemove] = useState<string[]>([]);
 
   const router = useRouter();
+  const { toast } = useToast();
 
   const form = useForm<addLinkFormValues>({
     resolver: zodResolver(addLinkFormSchema),
@@ -75,7 +77,8 @@ const HomeMain = () => {
           if (data.length > 0) {
             form.reset({ links: data });
           } else {
-            form.reset({ links: [{ platform: null, link: "" }] });
+            // Show "Let's get you started" if no links
+            form.reset({ links: [] });
           }
         } catch (err: any) {
           console.error(err);
@@ -90,6 +93,18 @@ const HomeMain = () => {
 
   const onSubmit = async (data: addLinkFormValues) => {
     setSubmitLoading(true);
+
+    // Prevent duplicate platforms
+    const platforms = data.links.map((l) => l.platform);
+    const hasDuplicates = platforms.some(
+      (platform, idx) => platform && platforms.indexOf(platform) !== idx,
+    );
+    if (hasDuplicates) {
+      toast({ description: "Each platform can only be used once." });
+      setSubmitLoading(false);
+      return;
+    }
+
     try {
       const response = await fetch("/api/links/new", {
         method: "POST",
@@ -107,12 +122,13 @@ const HomeMain = () => {
         const updatedLinks = await response.json();
         form.reset({ links: updatedLinks });
         setLinksToRemove([]);
+        toast({ description: "Links saved successfully!" });
+        router.push("/preview");
       } else {
-        console.error("Failed to save links");
+        toast({ description: "Failed to save links. Please try again." });
       }
-
-      router.push("/preview");
     } catch (error) {
+      toast({ description: "Network error. Please try again." });
       console.error("An error occurred:", error);
     }
     setSubmitLoading(false);

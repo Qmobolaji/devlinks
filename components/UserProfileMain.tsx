@@ -21,6 +21,7 @@ import { Input } from "@/components/ui/input";
 import { userProfileSchema } from "@/lib/schema";
 import { useToast } from "@/hooks/use-toast";
 import ProfilePicPlaceholder from "@/public/assets/ProfilePicPlaceholder.jpg";
+import { ColorRing } from "react-loader-spinner";
 
 type UserData = {
   profilePicture?: string;
@@ -37,6 +38,7 @@ const UserProfileMain = () => {
   const [userData, setUserData] = useState<UserData | null>(null);
   const [profilePicturePreview, setProfilePicturePreview] =
     useState<string>("");
+  const [updateLoading, setUpdateLoading] = useState(false);
 
   const router = useRouter();
   const { toast } = useToast();
@@ -89,20 +91,28 @@ const UserProfileMain = () => {
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      // Validate file type and size
+      if (!["image/png", "image/jpeg"].includes(file.type)) {
+        toast({ description: "Only PNG or JPG images are allowed." });
+        return;
+      }
+      if (file.size > 1024 * 1024) {
+        toast({ description: "Image must be below 1MB." });
+        return;
+      }
       const fileUrl = URL.createObjectURL(file);
       setProfilePicturePreview(fileUrl);
-
       form.setValue("profilePicture", file);
     }
   };
 
   const onSubmit = async (data: userProfileValues) => {
+    setUpdateLoading(true);
     const formData = new FormData();
 
     if (data.profilePicture instanceof File) {
       formData.append("profilePicture", data.profilePicture);
     }
-
     if (data.firstName) {
       formData.append("firstName", data.firstName);
     }
@@ -120,25 +130,26 @@ const UserProfileMain = () => {
       });
 
       if (!response.ok) {
-        toast({
-          description: "Failed to update profile. Please try again.",
-        });
-        throw new Error("Failed to update user data");
+        toast({ description: "Failed to update profile. Please try again." });
+        setUpdateLoading(false);
+        return;
       }
 
-      toast({
-        description: "Profile updated successfully!",
-      });
+      toast({ description: "Profile updated successfully!" });
       const updatedData = await response.json();
-
       setUserData(updatedData.user);
+      form.reset({
+        profilePicture: null,
+        firstName: updatedData.user.firstName || "",
+        lastName: updatedData.user.lastName || "",
+        email: updatedData.user.email || "",
+      });
       router.push("/preview");
     } catch (error) {
+      toast({ description: "Failed to save changes." });
       console.error(error);
-      toast({
-        description: "Failed to save changes.",
-      });
     }
+    setUpdateLoading(false);
   };
 
   return (
@@ -176,6 +187,7 @@ const UserProfileMain = () => {
                       userData?.profilePicture ||
                       ProfilePicPlaceholder.src
                     }
+                    priority
                     alt="Profile Picture"
                     className="mx-auto h-48 w-48 rounded-full object-cover"
                   />
@@ -247,8 +259,20 @@ const UserProfileMain = () => {
           <Button
             type="submit"
             className="block w-full rounded-lg bg-violet font-semibold text-white hover:bg-mauve disabled:bg-violet/25"
+            disabled={updateLoading}
           >
-            Save
+            {updateLoading ? (
+              <ColorRing
+                visible={true}
+                height="30"
+                width="30"
+                ariaLabel="color-ring-loading"
+                wrapperClass="color-ring-wrapper"
+                colors={["#737373", "#737373", "#737373", "#737373", "#737373"]}
+              />
+            ) : (
+              "Save"
+            )}
           </Button>
         </form>
       </FormProvider>
