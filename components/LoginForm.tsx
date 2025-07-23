@@ -56,22 +56,17 @@ const LoginForm = () => {
             </ToastAction>
           ),
         });
-
         setLoading(false);
-
         return;
       }
 
-      toast({
-        description: "Login successful",
-      });
-
+      toast({ description: "Login successful" });
       router.push("/");
-      router.refresh(); // without this, user won't be redirected automatically to home page
+      router.refresh();
     } catch (error) {
+      toast({ description: "Network error. Please try again." });
       console.error(error);
     }
-
     setLoading(false);
   };
 
@@ -80,6 +75,7 @@ const LoginForm = () => {
       <form
         onSubmit={form.handleSubmit(onSubmit)}
         className="flex w-full flex-col items-start gap-6 self-stretch"
+        autoComplete="off"
       >
         <FormField
           control={form.control}
@@ -89,7 +85,6 @@ const LoginForm = () => {
               <FormLabel className="text-xs font-normal text-charcoal md:text-sm">
                 Email address
               </FormLabel>
-
               <FormControl>
                 <div className="relative">
                   <Mail
@@ -101,6 +96,7 @@ const LoginForm = () => {
                     type="email"
                     placeholder="E.g. alex@gmail.com"
                     className="pl-9 text-base text-charcoal active:outline-violet md:text-lg"
+                    autoComplete="email"
                     {...field}
                   />
                 </div>
@@ -118,7 +114,6 @@ const LoginForm = () => {
               <FormLabel className="text-xs font-normal text-charcoal md:text-sm">
                 Password
               </FormLabel>
-
               <FormControl>
                 <div className="relative">
                   <Lock
@@ -130,8 +125,9 @@ const LoginForm = () => {
                     type="password"
                     placeholder="Enter Your Password"
                     className="pl-9 text-base text-charcoal active:outline-violet md:text-lg"
+                    autoComplete="current-password"
                     {...field}
-                  />{" "}
+                  />
                 </div>
               </FormControl>
               <FormMessage />
@@ -142,6 +138,7 @@ const LoginForm = () => {
         <Button
           type="submit"
           className="h-11 w-full rounded-lg bg-violet font-semibold text-white hover:bg-mauve"
+          disabled={loading}
         >
           {loading ? (
             <ColorRing
@@ -149,7 +146,6 @@ const LoginForm = () => {
               height="30"
               width="30"
               ariaLabel="color-ring-loading"
-              wrapperStyle={{}}
               wrapperClass="color-ring-wrapper"
               colors={["#737373", "#737373", "#737373", "#737373", "#737373"]}
             />

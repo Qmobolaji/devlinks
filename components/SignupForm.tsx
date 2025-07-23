@@ -41,20 +41,18 @@ const SignupForm = () => {
   const onSubmit = async (values: z.infer<typeof signupFormSchema>) => {
     setLoading(true);
     try {
+      // Check if user exists
       const resUserExists = await fetch("/api/userExists", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: values.email }),
       });
-
       const { user } = await resUserExists.json();
 
       if (user) {
         toast({
           description:
-            "Email is already in use! Please login or use another mail address",
+            "Email is already in use! Please login or use another email address.",
           action: (
             <ToastAction
               altText="Go to login page"
@@ -64,17 +62,14 @@ const SignupForm = () => {
             </ToastAction>
           ),
         });
-
         setLoading(false);
-
         return;
       }
 
+      // Register user
       const res = await fetch("/api/signup", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email: values.email,
           password: values.password,
@@ -82,12 +77,12 @@ const SignupForm = () => {
       });
 
       if (res.ok) {
-        toast({
-          description: "Sign up successful!",
-        });
+        toast({ description: "Sign up successful!" });
+        form.reset();
+        router.push("/auth/login");
       } else {
         toast({
-          description: "An error occurred, please try again",
+          description: "An error occurred, please try again.",
           action: (
             <ToastAction
               altText="Refresh page"
@@ -99,6 +94,7 @@ const SignupForm = () => {
         });
       }
     } catch (error) {
+      toast({ description: "Network error. Please try again." });
       console.error("Error during registration: ", error);
     }
     setLoading(false);
@@ -109,6 +105,7 @@ const SignupForm = () => {
       <form
         onSubmit={form.handleSubmit(onSubmit)}
         className="flex w-full flex-col items-start gap-6 self-stretch"
+        autoComplete="off"
       >
         <FormField
           control={form.control}
@@ -118,7 +115,6 @@ const SignupForm = () => {
               <FormLabel className="text-xs font-normal text-charcoal md:text-sm">
                 Email address
               </FormLabel>
-
               <FormControl>
                 <div className="relative">
                   <Mail
@@ -130,6 +126,7 @@ const SignupForm = () => {
                     type="email"
                     placeholder="e.g. alex@gmail.com"
                     className="pl-9 text-base text-charcoal active:outline-violet md:text-lg"
+                    autoComplete="email"
                     {...field}
                   />
                 </div>
@@ -147,7 +144,6 @@ const SignupForm = () => {
               <FormLabel className="text-xs font-normal text-charcoal md:text-sm">
                 Password
               </FormLabel>
-
               <FormControl>
                 <div className="relative">
                   <Lock
@@ -159,8 +155,9 @@ const SignupForm = () => {
                     type="password"
                     placeholder="At least 8 characters"
                     className="pl-9 text-base text-charcoal active:outline-violet md:text-lg"
+                    autoComplete="new-password"
                     {...field}
-                  />{" "}
+                  />
                 </div>
               </FormControl>
               <FormMessage />
@@ -174,9 +171,8 @@ const SignupForm = () => {
           render={({ field }) => (
             <FormItem className="w-full md:w-96">
               <FormLabel className="text-xs font-normal text-charcoal md:text-sm">
-                Password
+                Confirm Password
               </FormLabel>
-
               <FormControl>
                 <div className="relative">
                   <Lock
@@ -186,10 +182,11 @@ const SignupForm = () => {
                   />
                   <Input
                     type="password"
-                    placeholder="At least 8 characters"
+                    placeholder="Repeat password"
                     className="pl-9 text-base text-charcoal active:outline-violet md:text-lg"
+                    autoComplete="new-password"
                     {...field}
-                  />{" "}
+                  />
                 </div>
               </FormControl>
               <FormMessage />
@@ -200,6 +197,7 @@ const SignupForm = () => {
         <Button
           type="submit"
           className="h-11 w-full rounded-lg bg-violet font-semibold text-white hover:bg-mauve"
+          disabled={loading}
         >
           {loading ? (
             <ColorRing
@@ -207,7 +205,6 @@ const SignupForm = () => {
               height="30"
               width="30"
               ariaLabel="color-ring-loading"
-              wrapperStyle={{}}
               wrapperClass="color-ring-wrapper"
               colors={["#737373", "#737373", "#737373", "#737373", "#737373"]}
             />
