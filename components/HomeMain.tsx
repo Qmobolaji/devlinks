@@ -77,7 +77,8 @@ const HomeMain = () => {
           if (data.length > 0) {
             form.reset({ links: data });
           } else {
-            form.reset({ links: [{ platform: null, link: "" }] });
+            // Show "Let's get you started" if no links
+            form.reset({ links: [] });
           }
         } catch (err: any) {
           console.error(err);
