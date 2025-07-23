@@ -80,6 +80,7 @@ const PreviewSection = () => {
         <Image
           src={userData?.profilePicture || ProfilePicPlaceholder}
           alt="profile pic"
+          priority
           className="absolute left-1/4 top-[15%] h-auto w-1/2 rounded-full object-cover"
           width={192}
           height={192}

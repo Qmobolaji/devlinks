@@ -187,6 +187,7 @@ const UserProfileMain = () => {
                       userData?.profilePicture ||
                       ProfilePicPlaceholder.src
                     }
+                    priority
                     alt="Profile Picture"
                     className="mx-auto h-48 w-48 rounded-full object-cover"
                   />
